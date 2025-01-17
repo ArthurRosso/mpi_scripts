@@ -34,14 +34,6 @@ def allreduce_RS_GA(comm, rank, size, sendbuf, op):
 
 
 def allreduce_radix_k(comm, rank, size, data, rounds):
-    # Validate decomposition of p
-    if np.prod(rounds) != size:
-        raise ValueError("The product of factors must equal the total number of processes.")
-
-    # Initialize local data and ensure consistency of data shape across processes
-    if rank == 0:
-        if len(data) % size != 0:
-            raise ValueError("Array size must be divisible by the number of processes.")
     group_size = size
     for r, k_i in enumerate(rounds):
         group_size = group_size // k_i
@@ -74,7 +66,6 @@ def allreduce_radix_k(comm, rank, size, data, rounds):
                 for i in range(start, end):
                     data[i] += received_data[c]
                     c+=1
-        # print(f"Process {rank}: reduced data = {data}")
 
     gathered_data = comm.allgather(data[rank].item())
     return gathered_data
@@ -121,7 +112,7 @@ def main():
 
     # result = standard_allreduce(comm, data)
 
-    rounds = [2,2]
+    rounds = [3,2]
     result = allreduce_radix_k(comm, rank, size, data, rounds)
 
     # Print the result
